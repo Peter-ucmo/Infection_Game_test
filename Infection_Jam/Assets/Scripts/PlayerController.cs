@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] InputActionAsset actions;
 
     [Range(0.01f, 1.0f)] [SerializeField] float deceleration;
+    [SerializeField] float acceleration;
     [SerializeField] float moveSpeed;
 
     Rigidbody2D rb;
@@ -49,7 +50,26 @@ public class PlayerController : MonoBehaviour
         //Standard movement
         else
         {
-            rb.velocity = moveInput * moveSpeed;
+            if (rb.velocity.magnitude >= moveSpeed)
+            {
+                if (Vector2.Dot(rb.velocity, moveInput) > 0)
+                {
+                    rb.velocity = moveInput * moveSpeed;
+                }
+                else
+                {
+                    rb.velocity += moveInput * acceleration;
+                }
+
+                
+            }
+            else
+            {
+                rb.velocity += moveInput * acceleration;
+            }
+
+            
+            //rb.velocity = moveInput * moveSpeed;
         }
     }
 
