@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
-    public int maxCureCharges = 5;
+    int maxCureCharges = 5;
     int cureCharges = 5;
     int cureChargeProgress = 0; //In-Between from having no charge and having a fully usable charge -- +1 per enemy hit(?)
     int newCureChargeThreshold = 25;  //Number cureChargeProgress must reach before being fully charged

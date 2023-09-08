@@ -32,8 +32,6 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         moveInput = actions.FindActionMap("Standard").FindAction("Move").ReadValue<Vector2>().normalized;
-
-        if (moveInput != Vector2.zero) { playerStats.maxCureCharges = 3; }
     }
 
     private void FixedUpdate()
