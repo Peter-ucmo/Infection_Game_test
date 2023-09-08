@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(PlayerStats))]
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] InputActionAsset actions;
@@ -11,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float moveSpeed;
 
     Rigidbody2D rb;
+    PlayerStats playerStats;
 
     Vector2 moveInput;
 
@@ -18,6 +21,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerStats = GetComponent<PlayerStats>();
 
         Application.targetFrameRate = -1;
         //Application.targetFrameRate = 15;
@@ -29,6 +33,7 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = actions.FindActionMap("Standard").FindAction("Move").ReadValue<Vector2>().normalized;
 
+        if (moveInput != Vector2.zero) { playerStats.maxCureCharges = 3; }
     }
 
     private void FixedUpdate()
@@ -48,8 +53,6 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = moveInput * moveSpeed;
         }
-
-        Debug.Log("Fixed: " + rb.velocity.magnitude);
     }
 
     private void OnEnable()
