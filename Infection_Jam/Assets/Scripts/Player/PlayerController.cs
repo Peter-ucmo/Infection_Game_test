@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [Range(0.01f, 1.0f)] [SerializeField] float deceleration;
     [SerializeField] float acceleration;
     [SerializeField] float moveSpeed;
+    [SerializeField] float recoilSpeed;
 
     [SerializeField] GameObject hitboxPrefab;
 
@@ -117,12 +118,26 @@ public class PlayerController : MonoBehaviour
         while (inputComboCount > 0)
         {
             currentCombo++;
-            Debug.Log("Attack, " + lookDirection + ", " + currentCombo);
-            GameObject newBox = createHitbox(Vector2.right * lookDirection * 2, new Vector2(1, 2));
+            //Debug.Log("Attack, " + lookDirection + ", " + currentCombo);
 
-            yield return new WaitForSeconds(1);
-
-            Destroy(newBox);
+            GameObject newBox = null;
+            switch (currentCombo)
+            {
+                case 1:
+                    newBox = createHitbox(new Vector2(1, 0.5f), new Vector2(1, 1.8f), 1);
+                    yield return new WaitForSeconds(0.3f);
+                    break;
+                case 2:
+                    newBox = createHitbox(new Vector2(1.5f, 0.5f), new Vector2(2, 1.8f), 1);
+                    yield return new WaitForSeconds(0.2f);
+                    break;
+                case 3:
+                    newBox = createHitbox(new Vector2(2, 0.5f), new Vector2(3, 1.5f), 3);
+                    yield return new WaitForSeconds(0.5f);
+                    break;
+            }
+            
+            if (newBox != null) { Destroy(newBox); }
             inputComboCount--;
         }
 
@@ -130,14 +145,27 @@ public class PlayerController : MonoBehaviour
         inputComboCount = 0;
     }
 
-    private GameObject createHitbox(Vector2 positionOffset, Vector2 size)
+    private GameObject createHitbox(Vector2 positionOffset, Vector2 size, int damage)
     {
         GameObject newHitbox = Instantiate(hitboxPrefab, transform);
 
-        newHitbox.GetComponent<Transform>().position = transform.position + new Vector3(positionOffset.x, positionOffset.y, 0);
+        newHitbox.GetComponent<Transform>().position = transform.position + new Vector3(positionOffset.x * lookDirection, positionOffset.y, 0);
         newHitbox.GetComponent<BoxCollider2D>().size = size;
 
+
+        newHitbox.GetComponent<Hitbox>().Damage = damage;
+        newHitbox.GetComponent<Hitbox>().Instigator = this.gameObject;
+        newHitbox.GetComponent<Hitbox>().onHitboxHit.AddListener(OnHitboxHit);
+
         return newHitbox;
+    }
+
+    private void OnHitboxHit(Collider2D collider)
+    {
+        //Debug.Log("Hit " + collider.ClosestPoint(transform.position));
+        Debug.DrawLine(collider.ClosestPoint(transform.position), transform.position, Color.green);
+
+        rb.velocity += ((Vector2)transform.position - collider.ClosestPoint(transform.position)) * recoilSpeed;
     }
 
     private void OnEnable()

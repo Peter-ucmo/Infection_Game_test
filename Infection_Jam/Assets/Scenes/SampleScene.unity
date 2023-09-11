@@ -854,13 +854,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4943895155794595290, guid: 64d522c3c085fed4281e4c6304dfbe83, type: 3}
-      propertyPath: acceleration
-      value: 2
+      propertyPath: recoilSpeed
+      value: 7
       objectReference: {fileID: 0}
-    - target: {fileID: 4943895155794595290, guid: 64d522c3c085fed4281e4c6304dfbe83, type: 3}
-      propertyPath: hitboxPrefab
-      value: 
-      objectReference: {fileID: 4640550685383464494, guid: 73efe79e3b6097942bac93322ccb8acc, type: 3}
     - target: {fileID: 9115142157693294367, guid: 64d522c3c085fed4281e4c6304dfbe83, type: 3}
       propertyPath: m_Name
       value: Player

@@ -442,8 +442,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   actions: {fileID: -944628639613478452, guid: 930476208eb123044889f895e0a68a79, type: 3}
   deceleration: 0.2
-  acceleration: 0
+  acceleration: 2
   moveSpeed: 15
+  recoilSpeed: 7
   hitboxPrefab: {fileID: 4640550685383464494, guid: 73efe79e3b6097942bac93322ccb8acc, type: 3}
 --- !u!114 &2111325124192760021
 MonoBehaviour:
