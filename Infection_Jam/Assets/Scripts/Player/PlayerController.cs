@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,6 +12,8 @@ using UnityEngine.UIElements;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] InputActionAsset actions;
+
+    InputAction moveAction;
 
     [Range(0.01f, 1.0f)] [SerializeField] float deceleration;
     [SerializeField] float acceleration;
@@ -25,9 +28,11 @@ public class PlayerController : MonoBehaviour
     Vector2 moveInput;
     int inputComboCount = 0;
 
+    GameObject currentHitbox = null;
+
     int lookDirection = 1; //1 for right, -1 for left
 
-    enum PlayerStates { Idle, Attacking}
+    enum PlayerStates { Idle, Attacking, Rolling}
 
     PlayerStates playerState = PlayerStates.Idle;
     
@@ -37,6 +42,8 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerStats = GetComponent<PlayerStats>();
 
+        moveAction = actions.FindActionMap("Standard").FindAction("Move");
+
         Application.targetFrameRate = -1;
         //Application.targetFrameRate = 15;
 
@@ -45,9 +52,9 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ( playerState != PlayerStates.Attacking)
+        if ( playerState == PlayerStates.Idle)
         {
-            moveInput = actions.FindActionMap("Standard").FindAction("Move").ReadValue<Vector2>().normalized;
+            moveInput = moveAction.ReadValue<Vector2>().normalized;
         }
         else
         {
@@ -57,6 +64,13 @@ public class PlayerController : MonoBehaviour
         if (actions.FindActionMap("Standard").FindAction("Attack").triggered)
         {
             OnAttack();
+        }
+
+        if (actions.FindActionMap("Standard").FindAction("Roll").triggered && 
+            moveAction.ReadValue<Vector2>() != Vector2.zero && 
+            playerState != PlayerStates.Rolling)
+        {
+            DoRoll(moveAction.ReadValue<Vector2>().normalized);
         }
     }
 
@@ -71,12 +85,18 @@ public class PlayerController : MonoBehaviour
                 {
                     rb.velocity = Vector2.zero;
                 }
+
+                //Set back to idle after rolling
+                if (playerState == PlayerStates.Rolling && rb.velocity.magnitude < 1f) { playerState = PlayerStates.Idle; }
+
+                //TODO: Return player hurtbox after roll is partially completed; can be hurt during "roll stun"
+                if (playerState == PlayerStates.Rolling && rb.velocity.magnitude < 7f) {  }
             }
             //Standard movement
             else
             {
                 //Cap Movement Speed
-                if (rb.velocity.magnitude >= moveSpeed)
+                if (rb.velocity.magnitude >= moveSpeed && playerState == PlayerStates.Idle)
                 {
                     if (Vector2.Dot(rb.velocity, moveInput) > 0)
                     {
@@ -120,24 +140,24 @@ public class PlayerController : MonoBehaviour
             currentCombo++;
             //Debug.Log("Attack, " + lookDirection + ", " + currentCombo);
 
-            GameObject newBox = null;
+            //GameObject newBox = null;
             switch (currentCombo)
             {
                 case 1:
-                    newBox = createHitbox(new Vector2(1, 0.5f), new Vector2(1, 1.8f), 1);
+                    currentHitbox = createHitbox(new Vector2(1, 0.5f), new Vector2(1, 1.8f), 1);
                     yield return new WaitForSeconds(0.3f);
                     break;
                 case 2:
-                    newBox = createHitbox(new Vector2(1.5f, 0.5f), new Vector2(2, 1.8f), 1);
+                    currentHitbox = createHitbox(new Vector2(1.5f, 0.5f), new Vector2(2, 1.8f), 1);
                     yield return new WaitForSeconds(0.2f);
                     break;
                 case 3:
-                    newBox = createHitbox(new Vector2(2, 0.5f), new Vector2(3, 1.5f), 3);
+                    currentHitbox = createHitbox(new Vector2(2, 0.5f), new Vector2(3, 1.5f), 3);
                     yield return new WaitForSeconds(0.5f);
                     break;
             }
             
-            if (newBox != null) { Destroy(newBox); }
+            if (currentHitbox != null) { Destroy(currentHitbox); }
             inputComboCount--;
         }
 
@@ -166,6 +186,17 @@ public class PlayerController : MonoBehaviour
         Debug.DrawLine(collider.ClosestPoint(transform.position), transform.position, Color.green);
 
         rb.velocity += ((Vector2)transform.position - collider.ClosestPoint(transform.position)) * recoilSpeed;
+    }
+
+    private void DoRoll(Vector2 rollDir)
+    {
+        rb.velocity = rollDir * 70;
+        playerState = PlayerStates.Rolling;
+        Debug.Log("Rolling");
+        if (currentHitbox != null) { Destroy(currentHitbox); }
+        StopCoroutine(DoAttack());
+
+        //TODO: Disable player hurtbox
     }
 
     private void OnEnable()
