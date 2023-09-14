@@ -55,6 +55,11 @@ public class PlayerStats : MonoBehaviour
         isSafeFromDegradation = state;
     }
 
+    public int getCureCharges()
+    {
+        return cureCharges;
+    }
+
     //Debug UI, switch later when we have proper assets
     private void OnGUI()
     {

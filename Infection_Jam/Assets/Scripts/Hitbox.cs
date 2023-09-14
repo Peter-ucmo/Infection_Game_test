@@ -21,12 +21,6 @@ public class Hitbox : MonoBehaviour
         collider = GetComponent<BoxCollider2D>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void OnDrawGizmos()
     {
         

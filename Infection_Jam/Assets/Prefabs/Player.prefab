@@ -446,6 +446,7 @@ MonoBehaviour:
   moveSpeed: 15
   recoilSpeed: 7
   hitboxPrefab: {fileID: 4640550685383464494, guid: 73efe79e3b6097942bac93322ccb8acc, type: 3}
+  cureChargePrefab: {fileID: 7781352183999779185, guid: 26160a4b78125564f9d8dfc670a7e44f, type: 3}
 --- !u!114 &2111325124192760021
 MonoBehaviour:
   m_ObjectHideFlags: 0

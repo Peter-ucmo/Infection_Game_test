@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float recoilSpeed;
 
     [SerializeField] GameObject hitboxPrefab;
+    [SerializeField] GameObject cureChargePrefab;
 
     Rigidbody2D rb;
     PlayerStats playerStats;
@@ -32,7 +33,7 @@ public class PlayerController : MonoBehaviour
 
     int lookDirection = 1; //1 for right, -1 for left
 
-    enum PlayerStates { Idle, Attacking, Rolling}
+    enum PlayerStates { Idle, Attacking, Rolling, CureCharge}
 
     PlayerStates playerState = PlayerStates.Idle;
     
@@ -54,6 +55,13 @@ public class PlayerController : MonoBehaviour
     {
         if ( playerState == PlayerStates.Idle)
         {
+            if (actions.FindActionMap("Standard").FindAction("CureCharge").triggered && playerStats.getCureCharges() > 0)
+            {
+                playerStats.addCureCharges(-1);
+                StartCoroutine(PlantCureCharge());
+                return;
+            }
+
             moveInput = moveAction.ReadValue<Vector2>().normalized;
         }
         else
@@ -197,6 +205,24 @@ public class PlayerController : MonoBehaviour
         StopCoroutine(DoAttack());
 
         //TODO: Disable player hurtbox
+    }
+
+    private IEnumerator PlantCureCharge()
+    {
+        playerState = PlayerStates.CureCharge;
+
+        GameObject newCureCharge = Instantiate(cureChargePrefab);
+        newCureCharge.transform.position = transform.position;
+        //newCureCharge.GetComponent<CureZone>().colliderEvent.AddListener();
+
+        yield return new WaitForSeconds(3f);
+
+        playerState = PlayerStates.Idle;
+    }
+
+    public void setInCureZone(bool b)
+    {
+        playerStats.setIsSafeFromDegradation(b);
     }
 
     private void OnEnable()
